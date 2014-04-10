@@ -1,0 +1,14 @@
+{
+    "name": "retroboard",
+    "version": "0.0.1",
+    "description": "Whiteboard style application for managing retrospectives amongst remotely located agile teams.",
+    "author": "Brad Stoney",
+    "dependencies": {
+        "hashmap": "1.x.x",
+        "websocket": "1.x.x"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bstoney/Retroboard"
+    }
+}
