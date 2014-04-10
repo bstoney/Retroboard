@@ -9,8 +9,7 @@ Instructions
 1. Change `SERVER_PORT` in `server/server.js` to suit your needs
 2. Start node in the server directory with
 
-    ```node server.js
-    ```
+    `node server.js`
 
 3. Access the Retroboard with you browser
 
