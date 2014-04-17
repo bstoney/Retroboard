@@ -1,6 +1,6 @@
 var feedbackNotes = [];
 var connection;
-var feedbackNoteColour = Math.floor((Math.random() * 6) + 1);
+var feedbackNoteColour;
 var boardId = location.search.substr(1);
 var sourceId;
 $(function () {
@@ -11,6 +11,15 @@ $(function () {
     }
 
     sourceId = storedSourceId;
+
+    var boardIdKey = boardId ? boardId : '46db9e6d-560e-a97a-2538-d179f8391700';
+    var storedNoteColour = $.cookie(boardIdKey);
+    if(!storedNoteColour) {
+        storedNoteColour = Math.floor((Math.random() * 6) + 1);
+        $.cookie(boardIdKey, storedNoteColour);
+    }
+
+    feedbackNoteColour = storedNoteColour;
 
     connection = new WebSocket('ws://' + document.location.host + '/', 'feedback-protocol');
     connection.onopen = function (event) {
