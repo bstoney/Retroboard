@@ -2,11 +2,19 @@ var feedbackNotes = [];
 var connection;
 var feedbackNoteColour = Math.floor((Math.random() * 6) + 1);
 var boardId = location.search.substr(1);
-var sourceId = FeedbackNote.generateUid();
+var sourceId;
 $(function () {
+    var storedSourceId = $.cookie('sourceid');
+    if(!storedSourceId) {
+        storedSourceId = FeedbackNote.generateUid();
+        $.cookie('sourceid', storedSourceId);
+    }
+
+    sourceId = storedSourceId;
+
     connection = new WebSocket('ws://' + document.location.host + '/', 'feedback-protocol');
     connection.onopen = function (event) {
-        connection.send(JSON.stringify({ action: FeedbackNote.action.ALL, board: boardId }));
+        connection.send(JSON.stringify({ action: FeedbackNote.action.ALL, board: boardId, source: sourceId }));
     };
     connection.onmessage = function (event) {
         console.log('Received Message: ' + event.data);
@@ -22,6 +30,9 @@ $(function () {
                     note.location = newLocation;
                     note.colour = feedbackNoteColour;
                     note.send(connection, FeedbackNote.action.UPDATE, sourceId, boardId);
+                }
+                if(data.source == sourceId)
+                {
                     newFeedbackNote.feedbackNote("enableDelete");
                 }
                 newFeedbackNote.feedbackNote("update", note);
@@ -114,6 +125,11 @@ $(function () {
         },
 
         remove: function () {
+            var index = feedbackNotes.indexOf(this.element.get(0));
+            if (index > -1) {
+                feedbackNotes.splice(index, 1);
+            }
+
             this.element.remove();
         },
 

@@ -107,14 +107,14 @@ wsserver.on('request', function (request) {
             switch (data.action) {
                 case FeedbackNote.action.ALL:
                     feedbackNotes.forEach(function (value, key) {
-                        value.note.send(connection, FeedbackNote.action.ADD, null);
+                        value.note.send(connection, FeedbackNote.action.ADD, data.source == value.source ? data.source : null);
                     });
                     break;
                 case FeedbackNote.action.ADD:
                     var id = FeedbackNote.generateUid();
                     var newFeedbackNote = new FeedbackNote(id, data.note.text);
                     feedbackNotes.set(id, { source: data.source, note: newFeedbackNote });
-                    newFeedbackNote.send(connection, FeedbackNote.action.ADD, null);
+                    newFeedbackNote.send(connection, FeedbackNote.action.ADD, data.source);
                     break;
                 default:
                     if (feedbackNotes.has(data.note.id)) {
