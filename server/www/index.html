@@ -1,79 +1,69 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>
-<html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>
-<html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>
-<html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!-->
-<html class="no-js"> <!--<![endif]-->
+<html ng-app="retroboardApp">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title></title>
-    <meta name="description" content="">
+    <title>Retroboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <script type="text/javascript" src="js/common.js"></script>
+
+    <script type="text/javascript" src="js/vendor/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="js/vendor/angular.min.js"></script>
+    <script type="text/javascript" src="js/vendor/angular-cookies.min.js"></script>
+    <script type="text/javascript" src="js/feedbacknote.js"></script>
+    <script type="text/javascript" src="js/actionitem.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/userService.js"></script>
+    <script type="text/javascript" src="js/boardService.js"></script>
+    <script type="text/javascript" src="js/messengerService.js"></script>
+    <script type="text/javascript" src="js/retroboardController.js"></script>
+    <script type="text/javascript" src="js/noteController.js"></script>
+    <script type="text/javascript" src="js/actionItemController.js"></script>
+
+    <script type="text/javascript" src="js/vendor/jquery-ui-1.10.4.custom.min.js"></script>
 
     <link rel="stylesheet" href="css/south-street/jquery-ui-1.10.4.custom.min.css">
-    <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/main.css">
-    <script src="js/vendor/modernizr-2.6.2.min.js"></script>
 </head>
-<body>
-<!--[if lt IE 7]>
-<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
-    your browser</a> to improve your experience.</p>
-<![endif]-->
-
-<!-- Add your site or application content here -->
+<body ng-controller="RetroboardController">
 <header>
-    <h1 id="title">Title</h1>
+    <h1 id="title">{{boardName}}</h1>
+    <div id="actionItems">
+        <div class="actionList" ng-show="showActionItems">
+            <ul>
+                <li ng-repeat="actionItem in actionItems" ng-controller="ActionItemController" id="{{actionItem.id}}" class="actionItem">
+                    <span class="actionItem-Name">{{actionItem.name}}</span>
+                    <span class="actionItem-Text">{{actionItem.text}}</span>
+                    <span class="actionItem-Delete" rb-button button-icon="ui-icon-trash" ng-click="delete()">Delete</span>
+                </li>
+            </ul>
+            <div class="actionListControls">
+                <span ng-click="addActionItem()" rb-button>Add</span>
+                <input type="text" placeholder="Who" ng-model="actionItemName"/>
+                <input type="text" placeholder="Action description" ng-enter="addActionItem()" ng-model="actionItemText"/>
+            </div>
+        </div>
+        <div id="actionShowButton" ng-click="toggleActionItems()">Action Items</div>
+    </div>
 </header>
 <section id="feedbackSection">
-    <div class="feedbackGrouping">
-        <h1>What Went Well?</h1>
+    <div ng-repeat="note in notes" ng-controller="NoteController" id="{{note.id}}" rb-note ng-class="getStyle()" class="feedbackNote ui-state-highlight ui-corner-all">
+        <div class="feedbackNote-Text">{{note.text}}</div>
+        <div class="feedbackNote-Controls">
+            <span class="feedbackNote-Delete" rb-button button-icon="ui-icon-trash" ng-click="delete()">Delete</span>
+            <span class="feedbackNote-Vote" rb-button ng-click="vote()">Vote</span>
+        </div>
+        <div class="feedbackNote-Votes">{{note.votes ? note.votes : ''}}</div>
     </div>
-    <div class="feedbackGrouping">
-        <h1>What Didn't?</h1>
-    </div>
-    <div class="feedbackGrouping">
-        <h1>Puzzles?</h1>
+    <div ng-repeat="category in categories" rb-group class="feedbackGrouping">
+        <h1>{{category.title}}</h1>
     </div>
 </section>
 <footer>
-    <span id="addButton">Add</span>
-    <input type="text" id="newFeedbackText"/>
-    <div id="deleteArea" class="ui-corner-all">
-    </div>
-    <span id="exportButton">Export</span>
+    <span ng-click="addNote()" rb-button>Add</span>
+    <input type="text" placeholder="Feedback description" ng-enter="addNote()" ng-model="noteText"/>
+    <span ng-click="exportNotes()" rb-button>Export</span>
 </footer>
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
-<script src="js/vendor/jquery-ui-1.10.4.custom.min.js"></script>
-<script type="text/javascript" src="js/vendor/jquery.cookie.js"></script>
-<script src="js/plugins.js"></script>
-<script src="js/feedbacknote.js"></script>
-<script src="js/main.js"></script>
-
-<!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-<script>
-    (function (b, o, i, l, e, r) {
-        b.GoogleAnalyticsObject = l;
-        b[l] || (b[l] =
-                function () {
-                    (b[l].q = b[l].q || []).push(arguments)
-                });
-        b[l].l = +new Date;
-        e = o.createElement(i);
-        r = o.getElementsByTagName(i)[0];
-        e.src = '//www.google-analytics.com/analytics.js';
-        r.parentNode.insertBefore(e, r)
-    }(window, document, 'script', 'ga'));
-    ga('create', 'UA-XXXXX-X');
-    ga('send', 'pageview');
-</script>
 </body>
 </html>

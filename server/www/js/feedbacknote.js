@@ -22,10 +22,10 @@
 
     FeedbackNote.action = {
         ALL: 'all',
-        ADD: 'add',
-        VOTE: 'vote',
-        DELETE: 'delete',
-        UPDATE: 'update'
+        ADD: 'note-add',
+        VOTE: 'note-vote',
+        DELETE: 'note-delete',
+        UPDATE: 'note-update'
     };
 
     FeedbackNote.fromData = function (data) {
@@ -34,16 +34,6 @@
         feedbackNote.votes = data.votes;
         feedbackNote.colour = data.colour;
         return feedbackNote;
-    };
-
-    FeedbackNote.generateUid = function (separator) {
-        var delim = separator || "-";
-
-        function S4() {
-            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-        }
-
-        return (S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4());
     };
 
     exports.FeedbackNote = FeedbackNote;

@@ -5,6 +5,7 @@ var url = require("url");
 var ws = require('websocket').server;
 var HashMap = require('hashmap').HashMap;
 var FeedbackNote = require('./www/js/feedbacknote.js').FeedbackNote;
+var ActionItem = require('./www/js/actionitem.js').ActionItem;
 
 var mimeTypes = {
     "html": "text/html",
@@ -118,7 +119,7 @@ wsserver.on('request', function (request) {
                     break;
                 default:
                     if (feedbackNotes.has(data.note.id)) {
-                        var item = feedbackNotes.get(data.note.id)
+                        var item = feedbackNotes.get(data.note.id);
                         var isRequestFromSource = item.source == data.source;
                         var feedbackNote = item.note;
                         switch (data.action) {
