@@ -54,7 +54,7 @@ input[placeholder='Who'] {
 }
 
 input[placeholder='Action description'] {
-    width: 1500px;
+    width: 934px;
 }
 
 .feedbackNote {
@@ -130,22 +130,28 @@ input[placeholder='Action description'] {
     background-image: url('images/ui-bg_glass_6.png');
 }
 
-#actionItems {
+.actionItemsContainer {
     position: absolute;
     top: 0;
     width: 100%;
 }
 
+#actionItems {
+    width: 1220px;
+    margin: 0 auto;
+}
+
 #actionItems .actionListControls, #actionItems ul {
-    width: 1800px;
+    width: 1200px;
     padding: 0;
     margin: 10px auto;
 }
 
 #actionItems .actionList {
-    border-bottom: 2px solid grey;
+    border: 2px solid grey;
+    border-top-style: none;
     background-color: #ffffff;
-    /*display: none;*/
+    padding: 6px;
 }
 
 #actionShowButton {

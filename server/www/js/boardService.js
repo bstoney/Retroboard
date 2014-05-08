@@ -5,6 +5,10 @@ retroboardApp.factory('Board', ['User', 'Messenger', function (User, Messenger) 
     var notes = [];
     var actionItems = [];
 
+    var handleConnectionErrors = function (reason) {
+        alert(reason);
+    }
+
     function BoardService() {
         this.getBoardName = function () {
             return boardName;
@@ -22,7 +26,7 @@ retroboardApp.factory('Board', ['User', 'Messenger', function (User, Messenger) 
             var note = new FeedbackNote(Utilities.generateUid(), noteText);
             note.colour = User.getFeedbackNoteColour();
             note.sendAction = function (action) {
-                Messenger.send(action, boardId, note);
+                return Messenger.send(action, boardId, note).catch(handleConnectionErrors);
             }
 
             notes.push(note);
@@ -32,11 +36,12 @@ retroboardApp.factory('Board', ['User', 'Messenger', function (User, Messenger) 
         this.createActionItem = function (actionItemName, actionItemText) {
             var actionItem = new ActionItem(Utilities.generateUid(), actionItemName, actionItemText);
             actionItem.sendAction = function (action) {
-                Messenger.send(action, boardId, actionItem);
+                return Messenger.send(action, boardId, actionItem).catch(handleConnectionErrors);
             }
 
-            actionItems.push(actionItem);
-            actionItem.sendAction(ActionItem.action.ADD);
+            actionItem.sendAction(ActionItem.action.ADD).then(function () {
+                actionItems.push(actionItem);
+            });
             return actionItem;
         };
 

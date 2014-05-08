@@ -2,7 +2,7 @@ retroboardApp.factory('User', ['$cookies', function ($cookies) {
     function UserService() {
         var uniqueId = $cookies.sourceid;
         if (!uniqueId) {
-            uniqueId = FeedbackNote.generateUid();
+            uniqueId = Utilities.generateUid();
             $cookies.sourceid = uniqueId;
         }
 

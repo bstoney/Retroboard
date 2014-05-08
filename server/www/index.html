@@ -29,26 +29,33 @@
 <body ng-controller="RetroboardController">
 <header>
     <h1 id="title">{{boardName}}</h1>
-    <div id="actionItems">
-        <div class="actionList" ng-show="showActionItems">
-            <ul>
-                <li ng-repeat="actionItem in actionItems" ng-controller="ActionItemController" id="{{actionItem.id}}" class="actionItem">
-                    <span class="actionItem-Name">{{actionItem.name}}</span>
-                    <span class="actionItem-Text">{{actionItem.text}}</span>
-                    <span class="actionItem-Delete" rb-button button-icon="ui-icon-trash" ng-click="delete()">Delete</span>
-                </li>
-            </ul>
-            <div class="actionListControls">
-                <span ng-click="addActionItem()" rb-button>Add</span>
-                <input type="text" placeholder="Who" ng-model="actionItemName"/>
-                <input type="text" placeholder="Action description" ng-enter="addActionItem()" ng-model="actionItemText"/>
+
+    <div class="actionItemsContainer" ng-style="{zIndex: notes.length + 2}">
+        <div id="actionItems">
+            <div class="actionList" ng-show="showActionItems">
+                <ul>
+                    <li ng-repeat="actionItem in actionItems" ng-controller="ActionItemController"
+                        id="{{actionItem.id}}" class="actionItem">
+                        <span class="actionItem-Name">{{actionItem.name}}</span>
+                        <span class="actionItem-Text">{{actionItem.text}}</span>
+                        <span class="actionItem-Delete" rb-button button-icon="ui-icon-trash"
+                              ng-click="delete()">Delete</span>
+                    </li>
+                </ul>
+                <div class="actionListControls">
+                    <span ng-click="addActionItem()" rb-button>Add</span>
+                    <input type="text" placeholder="Who" ng-model="actionItemName"/>
+                    <input type="text" placeholder="Action description" ng-enter="addActionItem()"
+                           ng-model="actionItemText"/>
+                </div>
             </div>
+            <div id="actionShowButton" ng-click="toggleActionItems()">Action Items</div>
         </div>
-        <div id="actionShowButton" ng-click="toggleActionItems()">Action Items</div>
     </div>
 </header>
 <section id="feedbackSection">
-    <div ng-repeat="note in notes" ng-controller="NoteController" id="{{note.id}}" rb-note ng-class="getStyle()" class="feedbackNote ui-state-highlight ui-corner-all">
+    <div ng-repeat="note in notes" ng-controller="NoteController" id="{{note.id}}" rb-note ng-class="getStyle()"
+         class="feedbackNote ui-state-highlight ui-corner-all">
         <div class="feedbackNote-Text">{{note.text}}</div>
         <div class="feedbackNote-Controls">
             <span class="feedbackNote-Delete" rb-button button-icon="ui-icon-trash" ng-click="delete()">Delete</span>
@@ -64,6 +71,7 @@
     <span ng-click="addNote()" rb-button>Add</span>
     <input type="text" placeholder="Feedback description" ng-enter="addNote()" ng-model="noteText"/>
     <span ng-click="exportNotes()" rb-button>Export</span>
+    <div class="ui-widget-overlay ui-front" ng-show="showActionItems" ng-style="{zIndex: notes.length + 1}"></div>
 </footer>
 </body>
 </html>

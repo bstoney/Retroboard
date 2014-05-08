@@ -56,7 +56,7 @@ var server = http.createServer(function (request, response) {
 
 }).listen(SERVER_PORT);
 
-var wsserver = new ws({
+var wsServer = new ws({
     httpServer: server,
     autoAcceptConnections: false
 });
@@ -78,7 +78,7 @@ var broadcastAction = function (action, feedbackNote, clients) {
     }
 };
 
-wsserver.on('request', function (request) {
+wsServer.on('request', function (request) {
     if (!originIsAllowed(request.origin)) {
         // Make sure we only accept requests from an allowed origin
         request.reject();
@@ -93,62 +93,66 @@ wsserver.on('request', function (request) {
     connection.on('message', function (message) {
         if (message.type === 'utf8') {
             console.log('Received Message: ' + message.utf8Data);
-            var data = JSON.parse(message.utf8Data)
-            if (!clients) {
-                if (!clientMap.has(data.board)) {
-                    clientMap.set(data.board, []);
-                }
-                clients = clientMap.get(data.board);
-                index = clients.push(connection) - 1;
-            }
-            if (!retroBoards.has(data.board)) {
-                retroBoards.set(data.board, new HashMap());
-            }
-            var feedbackNotes = retroBoards.get(data.board);
-            switch (data.action) {
-                case FeedbackNote.action.ALL:
-                    feedbackNotes.forEach(function (value, key) {
-                        value.note.send(connection, FeedbackNote.action.ADD, data.source == value.source ? data.source : null);
-                    });
-                    break;
-                case FeedbackNote.action.ADD:
-                    var id = FeedbackNote.generateUid();
-                    var newFeedbackNote = new FeedbackNote(id, data.note.text);
-                    feedbackNotes.set(id, { source: data.source, note: newFeedbackNote });
-                    newFeedbackNote.send(connection, FeedbackNote.action.ADD, data.source);
-                    break;
-                default:
-                    if (feedbackNotes.has(data.note.id)) {
-                        var item = feedbackNotes.get(data.note.id);
-                        var isRequestFromSource = item.source == data.source;
-                        var feedbackNote = item.note;
-                        switch (data.action) {
-                            case FeedbackNote.action.UPDATE:
-                                feedbackNote.location = data.note.location;
-                                if (isRequestFromSource) {
-                                    feedbackNote.colour = data.note.colour;
-                                }
-                                broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, clients);
-                                break;
-                            case FeedbackNote.action.DELETE:
-                                if (isRequestFromSource) {
-                                    feedbackNotes.remove(feedbackNote.id);
-                                    broadcastAction(FeedbackNote.action.DELETE, feedbackNote, clients);
-                                }
-                                break;
-                            case FeedbackNote.action.VOTE:
-                                feedbackNote.votes++;
-                                broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, clients);
-                                break;
-                        }
-                    }
-                    break;
-            }
+            connection.send(message.utf8Data);
+//            var data = JSON.parse(message.utf8Data)
+//            if (!clients) {
+//                if (!clientMap.has(data.board)) {
+//                    clientMap.set(data.board, []);
+//                }
+//                clients = clientMap.get(data.board);
+//                index = clients.push(connection) - 1;
+//            }
+//            if (!retroBoards.has(data.board)) {
+//                retroBoards.set(data.board, new HashMap());
+//            }
+//            var feedbackNotes = retroBoards.get(data.board);
+//            switch (data.action) {
+//                case FeedbackNote.action.ALL:
+//                    feedbackNotes.forEach(function (value, key) {
+//                        value.note.send(connection, FeedbackNote.action.ADD, data.source == value.source ? data.source : null);
+//                    });
+//                    break;
+//                case FeedbackNote.action.ADD:
+//                    var id = FeedbackNote.generateUid();
+//                    var newFeedbackNote = new FeedbackNote(id, data.note.text);
+//                    feedbackNotes.set(id, { source: data.source, note: newFeedbackNote });
+//                    newFeedbackNote.send(connection, FeedbackNote.action.ADD, data.source);
+//                    break;
+//                default:
+//                    if (feedbackNotes.has(data.note.id)) {
+//                        var item = feedbackNotes.get(data.note.id);
+//                        var isRequestFromSource = item.source == data.source;
+//                        var feedbackNote = item.note;
+//                        switch (data.action) {
+//                            case FeedbackNote.action.UPDATE:
+//                                feedbackNote.location = data.note.location;
+//                                if (isRequestFromSource) {
+//                                    feedbackNote.colour = data.note.colour;
+//                                }
+//                                broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, clients);
+//                                break;
+//                            case FeedbackNote.action.DELETE:
+//                                if (isRequestFromSource) {
+//                                    feedbackNotes.remove(feedbackNote.id);
+//                                    broadcastAction(FeedbackNote.action.DELETE, feedbackNote, clients);
+//                                }
+//                                break;
+//                            case FeedbackNote.action.VOTE:
+//                                feedbackNote.votes++;
+//                                broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, clients);
+//                                break;
+//                        }
+//                    }
+//                    break;
+//            }
+        }
+        else {
+            console.log('Received unexpected data type ' + message.type);
         }
     });
     connection.on('close', function (reasonCode, description) {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
         // remove user from the list of connected clients
-        clients.splice(index, 1);
+//  TODO      clients.splice(index, 1);
     });
 });
