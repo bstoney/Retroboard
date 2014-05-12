@@ -28,7 +28,8 @@ header h1 {
     border-right: 1px solid grey;
     font-size: 30px;
     color: lightgrey;
-    line-height: 200px;
+    line-height: 160px;
+    background: no-repeat center;
 }
 
 .feedbackGrouping:last-of-type {

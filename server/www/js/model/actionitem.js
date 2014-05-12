@@ -11,12 +11,7 @@
         constructor: ActionItem,
         id: '',
         name: '',
-        text: '',
-        send: function (connection, action, sourceId, boardId) {
-            var json = JSON.stringify({action: action, board: boardId, source: sourceId, actionItem: this});
-            console.log('Sent Message: ' + json);
-            connection.send(json);
-        }
+        text: ''
     };
 
     ActionItem.action = {

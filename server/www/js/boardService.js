@@ -1,48 +1,61 @@
-retroboardApp.factory('Board', ['User', 'Messenger', function (User, Messenger) {
-    var boardName = decodeURIComponent(location.search.substr(1));
-    var boardId = boardName ? boardName : '46db9e6d-560e-a97a-2538-d179f8391700';
+retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messenger, $q) {
+    var retroboard = new Retroboard(decodeURIComponent(location.search.substr(1)));
 
-    var notes = [];
-    var actionItems = [];
-
-    var handleConnectionErrors = function (reason) {
-        alert(reason);
+    function send(action, data) {
+        return Messenger.send(action, retroboard.boardId, data)
+            .catch(function (reason) {
+                alert(reason);
+                return $q.reject(reason);
+            });
     }
+
+    Messenger.register(MessengerServiceEvents.OPEN, function () {
+        send(Retroboard.action.GET).then(function (data) {
+            retroboard.fromData(data);
+            // TODO attach send method?
+        });
+    });
+    Messenger.register(MessengerServiceEvents.ERROR, function (error) {
+        alert(error);
+    });
+    Messenger.register(ActionItem.action.ADD, function (actionItem) {
+        retroboard.addActionItem(actionItem);
+        // TODO attach send method?
+    });
+    Messenger.register(ActionItem.action.DELETE, function (id) {
+        retroboard.removeActionItem(id);
+    });
 
     function BoardService() {
         this.getBoardName = function () {
-            return boardName;
+            return retroboard.boardName;
         };
 
         this.getNotes = function () {
-            return notes;
+            return retroboard.notes;
         };
 
         this.getActionItems = function () {
-            return actionItems;
+            return retroboard.actionItems;
         };
 
         this.createNote = function (noteText) {
             var note = new FeedbackNote(Utilities.generateUid(), noteText);
             note.colour = User.getFeedbackNoteColour();
             note.sendAction = function (action) {
-                return Messenger.send(action, boardId, note).catch(handleConnectionErrors);
-            }
+                return send(action, note);
+            };
 
-            notes.push(note);
+            note.sendAction(FeedbackNote.action.ADD).then(function () {
+                notes.push(note);
+            });
+
             return note;
         };
 
         this.createActionItem = function (actionItemName, actionItemText) {
             var actionItem = new ActionItem(Utilities.generateUid(), actionItemName, actionItemText);
-            actionItem.sendAction = function (action) {
-                return Messenger.send(action, boardId, actionItem).catch(handleConnectionErrors);
-            }
-
-            actionItem.sendAction(ActionItem.action.ADD).then(function () {
-                actionItems.push(actionItem);
-            });
-            return actionItem;
+            send(ActionItem.action.ADD, actionItem);
         };
 
         this.deleteNote = function (note) {
@@ -54,11 +67,7 @@ retroboardApp.factory('Board', ['User', 'Messenger', function (User, Messenger) 
         };
 
         this.deleteActionItem = function (actionItem) {
-            var index = actionItems.indexOf(actionItem);
-            if (index != -1) {
-                actionItems.splice(index, 1);
-                actionItem.sendAction(ActionItem.action.DELETE);
-            }
+            send(ActionItem.action.DELETE, actionItem);
         };
 
         this.getHighVoteScore = function () {

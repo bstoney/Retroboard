@@ -13,9 +13,18 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
     $scope.showActionItems = false;
 
     $scope.categories = [
-        { title: 'What Went Well?'},
-        { title: 'What Didn\'t?'},
-        { title: 'Puzzles?'}
+        {
+            title: 'What Went Well?',
+            image: 'url(\'images/smiley.png\')'
+        },
+        {
+            title: 'What Didn\'t?',
+            image: 'url(\'images/sad.png\')'
+        },
+        {
+            title: 'Puzzles?',
+            image: 'url(\'images/confused.png\')'
+        }
     ];
 
     $scope.addNote = function () {
@@ -39,4 +48,5 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
     $scope.exportNotes = function () {
         Board.exportNotes($scope.categories);
     };
-}]);
+}])
+;

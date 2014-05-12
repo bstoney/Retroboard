@@ -12,12 +12,7 @@
         text: '',
         location: null,
         votes: 0,
-        colour: 1,
-        send: function (connection, action, sourceId, boardId) {
-            var json = JSON.stringify({action: action, board: boardId, source: sourceId, note: this});
-            console.log('Sent Message: ' + json);
-            connection.send(json);
-        }
+        colour: 1
     };
 
     FeedbackNote.action = {

@@ -4,8 +4,10 @@ var path = require("path");
 var url = require("url");
 var ws = require('websocket').server;
 var HashMap = require('hashmap').HashMap;
-var FeedbackNote = require('./www/js/feedbacknote.js').FeedbackNote;
-var ActionItem = require('./www/js/actionitem.js').ActionItem;
+var Utilities = require('./www/js/common.js').Utilities;
+var Retroboard = require('./www/js/model/retroboard.js').Retroboard;
+var FeedbackNote = require('./www/js/model/feedbacknote.js').FeedbackNote;
+var ActionItem = require('./www/js/model/actionitem.js').ActionItem;
 
 var mimeTypes = {
     "html": "text/html",
@@ -69,13 +71,74 @@ function originIsAllowed(origin) {
 var retroBoards = new HashMap();
 var clientMap = new HashMap();
 
-var broadcastAction = function (action, feedbackNote, clients) {
+var broadcastAction = function (action, boardId, data, clients) {
+    var payload = {
+        id: Utilities.generateUid(),
+        action: action,
+        user: null,
+        board: boardId,
+        data: data
+    };
     // broadcast message to all connected clients
-    var json = JSON.stringify({action: action, note: feedbackNote});
+    var json = JSON.stringify(payload);
     console.log('Broadcast Message: ' + json);
     for (var i = 0; i < clients.length; i++) {
         clients[i].sendUTF(json);
     }
+};
+
+var handleClientMessage = function (retroboard, action, data, clients) {
+    switch (action) {
+        case Retroboard.action.GET:
+            return retroboard;
+        case FeedbackNote.action.ADD:
+//            var note = FeedbackNote.fromData(data.data);
+//            var id = FeedbackNote.generateUid();
+//            var newFeedbackNote = new FeedbackNote(id, data.note.text);
+//            boardData.feedbackNotes.set(id, { source: data.source, note: newFeedbackNote });
+//            newFeedbackNote.send(connection, FeedbackNote.action.ADD, null);
+            break;
+        case ActionItem.action.ADD:
+            var id = Utilities.generateUid();
+            var newActionItem = ActionItem.fromData(data);
+            newActionItem.id = id;
+            retroboard.addActionItem(newActionItem);
+            broadcastAction(ActionItem.action.ADD, retroboard.id, newActionItem, clients);
+            return;
+        case ActionItem.action.DELETE:
+            var actionItem = ActionItem.fromData(data);
+            retroboard.removeActionItem(actionItem.id);
+            broadcastAction(ActionItem.action.DELETE, retroboard.id, actionItem.id, clients);
+            return;
+        default:
+//            if (boardData.feedbackNotes.has(data.note.id)) {
+//                var item = boardData.feedbackNotes.get(data.note.id)
+//                var isRequestFromSource = item.source == data.source;
+//                var feedbackNote = item.note;
+//                switch (data.action) {
+//                    case FeedbackNote.action.UPDATE:
+//                        feedbackNote.location = data.note.location;
+//                        if (isRequestFromSource) {
+//                            feedbackNote.colour = data.note.colour;
+//                        }
+//                        broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, null, clients);
+//                        break;
+//                    case FeedbackNote.action.DELETE:
+//                        if (isRequestFromSource) {
+//                            boardData.feedbackNotes.remove(feedbackNote.id);
+//                            broadcastAction(FeedbackNote.action.DELETE, feedbackNote, null, clients);
+//                        }
+//                        break;
+//                    case FeedbackNote.action.VOTE:
+//                        feedbackNote.votes++;
+//                        broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, null, clients);
+//                        break;
+//                }
+//            }
+            break;
+    }
+
+    throw "Not implemented";
 };
 
 wsServer.on('request', function (request) {
@@ -93,58 +156,30 @@ wsServer.on('request', function (request) {
     connection.on('message', function (message) {
         if (message.type === 'utf8') {
             console.log('Received Message: ' + message.utf8Data);
-            connection.send(message.utf8Data);
-//            var data = JSON.parse(message.utf8Data)
-//            if (!clients) {
-//                if (!clientMap.has(data.board)) {
-//                    clientMap.set(data.board, []);
-//                }
-//                clients = clientMap.get(data.board);
-//                index = clients.push(connection) - 1;
-//            }
-//            if (!retroBoards.has(data.board)) {
-//                retroBoards.set(data.board, new HashMap());
-//            }
-//            var feedbackNotes = retroBoards.get(data.board);
-//            switch (data.action) {
-//                case FeedbackNote.action.ALL:
-//                    feedbackNotes.forEach(function (value, key) {
-//                        value.note.send(connection, FeedbackNote.action.ADD, data.source == value.source ? data.source : null);
-//                    });
-//                    break;
-//                case FeedbackNote.action.ADD:
-//                    var id = FeedbackNote.generateUid();
-//                    var newFeedbackNote = new FeedbackNote(id, data.note.text);
-//                    feedbackNotes.set(id, { source: data.source, note: newFeedbackNote });
-//                    newFeedbackNote.send(connection, FeedbackNote.action.ADD, data.source);
-//                    break;
-//                default:
-//                    if (feedbackNotes.has(data.note.id)) {
-//                        var item = feedbackNotes.get(data.note.id);
-//                        var isRequestFromSource = item.source == data.source;
-//                        var feedbackNote = item.note;
-//                        switch (data.action) {
-//                            case FeedbackNote.action.UPDATE:
-//                                feedbackNote.location = data.note.location;
-//                                if (isRequestFromSource) {
-//                                    feedbackNote.colour = data.note.colour;
-//                                }
-//                                broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, clients);
-//                                break;
-//                            case FeedbackNote.action.DELETE:
-//                                if (isRequestFromSource) {
-//                                    feedbackNotes.remove(feedbackNote.id);
-//                                    broadcastAction(FeedbackNote.action.DELETE, feedbackNote, clients);
-//                                }
-//                                break;
-//                            case FeedbackNote.action.VOTE:
-//                                feedbackNote.votes++;
-//                                broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, clients);
-//                                break;
-//                        }
-//                    }
-//                    break;
-//            }
+            var payload = JSON.parse(message.utf8Data)
+            if (!clients) {
+                if (!clientMap.has(payload.board)) {
+                    clientMap.set(payload.board, []);
+                }
+                clients = clientMap.get(payload.board);
+                index = clients.push(connection) - 1;
+            }
+            if (!retroBoards.has(payload.board)) {
+                retroBoards.set(payload.board, new Retroboard(payload.board));
+            }
+
+            var retroboard = retroBoards.get(payload.board);
+
+            var response = { action: payload.id };
+            try {
+                response.data = handleClientMessage(retroboard, payload.action, payload.data, clients);
+            }
+            catch (e) {
+                console.log(e);
+                response.error = e.toString();
+            }
+
+            connection.send(JSON.stringify(response));
         }
         else {
             console.log('Received unexpected data type ' + message.type);

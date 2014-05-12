@@ -11,8 +11,9 @@
     <script type="text/javascript" src="js/vendor/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="js/vendor/angular.min.js"></script>
     <script type="text/javascript" src="js/vendor/angular-cookies.min.js"></script>
-    <script type="text/javascript" src="js/feedbacknote.js"></script>
-    <script type="text/javascript" src="js/actionitem.js"></script>
+    <script type="text/javascript" src="js/model/retroboard.js"></script>
+    <script type="text/javascript" src="js/model/feedbacknote.js"></script>
+    <script type="text/javascript" src="js/model/actionitem.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
     <script type="text/javascript" src="js/userService.js"></script>
     <script type="text/javascript" src="js/boardService.js"></script>
@@ -63,7 +64,7 @@
         </div>
         <div class="feedbackNote-Votes">{{note.votes ? note.votes : ''}}</div>
     </div>
-    <div ng-repeat="category in categories" rb-group class="feedbackGrouping">
+    <div ng-repeat="category in categories" rb-group class="feedbackGrouping" ng-style="{backgroundImage: category.image}">
         <h1>{{category.title}}</h1>
     </div>
 </section>
