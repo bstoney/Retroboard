@@ -12,15 +12,25 @@ retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messe
     Messenger.register(MessengerServiceEvents.OPEN, function () {
         send(Retroboard.action.GET).then(function (data) {
             retroboard.fromData(data);
-            // TODO attach send method?
         });
     });
     Messenger.register(MessengerServiceEvents.ERROR, function (error) {
         alert(error);
     });
+    Messenger.register(FeedbackNote.action.ADD, function (note) {
+        retroboard.addNote(note);
+    });
+    Messenger.register(FeedbackNote.action.DELETE, function (id) {
+        retroboard.removeNote(id);
+    });
+    Messenger.register(FeedbackNote.action.UPDATE, function (data) {
+        var note = retroboard.getNote(data.id);
+        if (note) {
+            note.updateFromData(data);
+        }
+    });
     Messenger.register(ActionItem.action.ADD, function (actionItem) {
         retroboard.addActionItem(actionItem);
-        // TODO attach send method?
     });
     Messenger.register(ActionItem.action.DELETE, function (id) {
         retroboard.removeActionItem(id);
@@ -40,30 +50,22 @@ retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messe
         };
 
         this.createNote = function (noteText) {
-            var note = new FeedbackNote(Utilities.generateUid(), noteText);
+            var note = new FeedbackNote("", noteText);
             note.colour = User.getFeedbackNoteColour();
-            note.sendAction = function (action) {
-                return send(action, note);
-            };
-
-            note.sendAction(FeedbackNote.action.ADD).then(function () {
-                notes.push(note);
-            });
-
-            return note;
-        };
-
-        this.createActionItem = function (actionItemName, actionItemText) {
-            var actionItem = new ActionItem(Utilities.generateUid(), actionItemName, actionItemText);
-            send(ActionItem.action.ADD, actionItem);
+            send(FeedbackNote.action.ADD, note);
         };
 
         this.deleteNote = function (note) {
-            var index = notes.indexOf(note);
-            if (index != -1) {
-                notes.splice(index, 1);
-                note.sendAction(FeedbackNote.action.DELETE);
-            }
+            send(FeedbackNote.action.DELETE, note);
+        };
+
+        this.updateNote = function (note) {
+            send(FeedbackNote.action.UPDATE, note);
+        }
+
+        this.createActionItem = function (actionItemName, actionItemText) {
+            var actionItem = new ActionItem("", actionItemName, actionItemText);
+            send(ActionItem.action.ADD, actionItem);
         };
 
         this.deleteActionItem = function (actionItem) {

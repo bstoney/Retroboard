@@ -21,6 +21,19 @@ if (typeof require != 'undefined') {
         addNote: function (note) {
             this.notes.push(note);
         },
+        removeNote: function (id) {
+            var index = Utilities.indexOf(this.notes, function (a) {
+                return a.id == id;
+            });
+            if (index >= 0) {
+                this.notes.splice(index, 1);
+            }
+        },
+        getNote: function (id) {
+            return this.notes.filter(function (a) {
+                return a.id == id;
+            })[0];
+        },
         addActionItem: function (actionItem) {
             this.actionItems.push(actionItem);
         },

@@ -18,7 +18,7 @@ retroboardApp.controller('NoteController', ['$scope', 'Board', function ($scope,
     $scope.vote = function () {
         $scope.note.votes++;
         $scope.$emit(RetroboardController_events, $scope.note);
-        $scope.note.sendAction(FeedbackNote.action.UPDATE);
+        Board.updateNote($scope.note);
     };
     $scope.delete = function () {
         Board.deleteNote($scope.note);
@@ -26,7 +26,7 @@ retroboardApp.controller('NoteController', ['$scope', 'Board', function ($scope,
     $scope.setLocation = function (location) {
         $scope.note.location = location;
         onUpdateUi();
-        $scope.note.sendAction(FeedbackNote.action.UPDATE);
+        Board.updateNote($scope.note);
     };
 
     $scope.updateUi = null;

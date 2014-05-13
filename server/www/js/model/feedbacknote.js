@@ -12,7 +12,11 @@
         text: '',
         location: null,
         votes: 0,
-        colour: 1
+        colour: 1,
+        updateFromData: function (data) {
+            this.location = data.location;
+            this.votes = data.votes;
+        }
     };
 
     FeedbackNote.action = {
@@ -21,14 +25,6 @@
         VOTE: 'note-vote',
         DELETE: 'note-delete',
         UPDATE: 'note-update'
-    };
-
-    FeedbackNote.fromData = function (data) {
-        var feedbackNote = new FeedbackNote(data.id, data.text);
-        feedbackNote.location = data.location;
-        feedbackNote.votes = data.votes;
-        feedbackNote.colour = data.colour;
-        return feedbackNote;
     };
 
     exports.FeedbackNote = FeedbackNote;

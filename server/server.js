@@ -92,12 +92,24 @@ var handleClientMessage = function (retroboard, action, data, clients) {
         case Retroboard.action.GET:
             return retroboard;
         case FeedbackNote.action.ADD:
-//            var note = FeedbackNote.fromData(data.data);
-//            var id = FeedbackNote.generateUid();
-//            var newFeedbackNote = new FeedbackNote(id, data.note.text);
-//            boardData.feedbackNotes.set(id, { source: data.source, note: newFeedbackNote });
-//            newFeedbackNote.send(connection, FeedbackNote.action.ADD, null);
-            break;
+// TODO            boardData.feedbackNotes.set(id, { source: data.source, note: newFeedbackNote });
+            var newNote = new FeedbackNote(Utilities.generateUid(), data.text)
+            newNote.updateFromData(data);
+            retroboard.addNote(newNote);
+            broadcastAction(FeedbackNote.action.ADD, retroboard.id, newNote, clients);
+            return;
+        case FeedbackNote.action.DELETE:
+            // TODO verify permission
+            retroboard.removeNote(data.id);
+            broadcastAction(FeedbackNote.action.DELETE, retroboard.id, data.id, clients);
+            return;
+        case FeedbackNote.action.UPDATE:
+            var note = retroboard.getNote(data.id);
+            if (note) {
+                note.updateFromData(data);
+                broadcastAction(FeedbackNote.action.UPDATE, retroboard.id, note, clients);
+            }
+            return;
         case ActionItem.action.ADD:
             var id = Utilities.generateUid();
             var newActionItem = ActionItem.fromData(data);
@@ -106,9 +118,8 @@ var handleClientMessage = function (retroboard, action, data, clients) {
             broadcastAction(ActionItem.action.ADD, retroboard.id, newActionItem, clients);
             return;
         case ActionItem.action.DELETE:
-            var actionItem = ActionItem.fromData(data);
-            retroboard.removeActionItem(actionItem.id);
-            broadcastAction(ActionItem.action.DELETE, retroboard.id, actionItem.id, clients);
+            retroboard.removeActionItem(data.id);
+            broadcastAction(ActionItem.action.DELETE, retroboard.id, data.id, clients);
             return;
         default:
 //            if (boardData.feedbackNotes.has(data.note.id)) {

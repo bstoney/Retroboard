@@ -14,6 +14,9 @@ retroboardApp.directive('rbNote', function () {
             if (!scope.note.location) {
                 scope.setLocation(makeNewPosition(element));
             }
+            else {
+                element.animate(scope.note.location);
+            }
 
             element.draggable({ containment: "window" })
                 .on("dragstart",function (event, ui) {
