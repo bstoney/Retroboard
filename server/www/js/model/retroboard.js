@@ -1,4 +1,8 @@
 ;
+if (typeof require != 'undefined') {
+    var Utilities = require('../common.js').Utilities;
+}
+
 (function (exports) {
 
     function Retroboard(boardName) {
@@ -6,7 +10,7 @@
         this.id = boardName ? boardName : '46db9e6d-560e-a97a-2538-d179f8391700';
         this.notes = [];
         this.actionItems = [];
-    };
+    }
 
     Retroboard.prototype = {
         constructor: Retroboard,

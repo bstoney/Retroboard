@@ -26,7 +26,7 @@ retroboardApp.factory('Messenger', ['User', '$rootScope', '$q', function (User, 
     var connection;
 
     function createConnection() {
-        if(connection && connection.readyState == WebSocket.OPEN){
+        if (connection && connection.readyState == WebSocket.OPEN) {
             return $q.when();
         }
 
@@ -139,7 +139,7 @@ retroboardApp.factory('Messenger', ['User', '$rootScope', '$q', function (User, 
             $rootScope.$broadcast(MessengerServiceEvents.ERROR, error);
         });
         this.send = function (action, boardId, data) {
-            return createConnection().catch().then(function() {
+            return createConnection().catch().then(function () {
                 return sendActionMessage(action, boardId, data);
             });
         };
