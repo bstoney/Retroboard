@@ -1,6 +1,7 @@
 ;
 if (typeof require != 'undefined') {
     var Utilities = require('../common.js').Utilities;
+    var FeedbackNote = require('./www/js/model/feedbacknote.js').FeedbackNote;
 }
 
 (function (exports) {
@@ -19,6 +20,9 @@ if (typeof require != 'undefined') {
         notes: [],
         actionItems: [],
         addNote: function (note) {
+            if (typeof note != 'FeedbackNote') {
+                note = FeedbackNote.createFromData(note);
+            }
             this.notes.push(note);
         },
         removeNote: function (id) {
@@ -51,7 +55,7 @@ if (typeof require != 'undefined') {
             }
 
             var self = this;
-            this.boardName = data.boardName;
+            this.boardName = data.boardName || this.boardName;
             this.id = data.id;
             this.notes.length = 0;
             data.notes.forEach(function (n) {

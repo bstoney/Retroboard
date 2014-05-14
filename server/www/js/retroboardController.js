@@ -1,5 +1,6 @@
 var RetroboardController_events = {
-    ON_NOTE_VOTE: "note-vote"
+    ON_NOTE_VOTE: "note-vote",
+    ON_NOTE_UPDATE: "note-update"
 }
 
 retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', function ($scope, User, Board) {

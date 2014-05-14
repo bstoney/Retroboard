@@ -1,4 +1,4 @@
-retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messenger, $q) {
+retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', function ($rootScope, User, Messenger, $q) {
     var retroboard = new Retroboard(decodeURIComponent(location.search.substr(1)));
 
     function send(action, data) {
@@ -17,8 +17,8 @@ retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messe
     Messenger.register(MessengerServiceEvents.ERROR, function (error) {
         alert(error);
     });
-    Messenger.register(FeedbackNote.action.ADD, function (note) {
-        retroboard.addNote(note);
+    Messenger.register(FeedbackNote.action.ADD, function (data) {
+        retroboard.addNote(FeedbackNote.createFromData(data));
     });
     Messenger.register(FeedbackNote.action.DELETE, function (id) {
         retroboard.removeNote(id);
@@ -27,6 +27,7 @@ retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messe
         var note = retroboard.getNote(data.id);
         if (note) {
             note.updateFromData(data);
+            $rootScope.$broadcast(note.id);
         }
     });
     Messenger.register(ActionItem.action.ADD, function (actionItem) {
@@ -59,7 +60,12 @@ retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messe
             send(FeedbackNote.action.DELETE, note);
         };
 
-        this.updateNote = function (note) {
+        this.voteOnNote = function (note) {
+            send(FeedbackNote.action.VOTE, note);
+        }
+
+        this.setNoteLocation = function (note, location) {
+            note.location = location;
             send(FeedbackNote.action.UPDATE, note);
         }
 
@@ -74,7 +80,7 @@ retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messe
 
         this.getHighVoteScore = function () {
             var notesByVote = [];
-            $.each(notes, function () {
+            $.each(retroboard.notes, function () {
                 var votes = this.votes;
                 if (!notesByVote[votes]) {
                     notesByVote[votes] = [];
@@ -91,15 +97,15 @@ retroboardApp.factory('Board', ['User', 'Messenger', '$q', function (User, Messe
         this.exportNotes = function (categories) {
             var content = "Category,Feedback,Votes\n";
             var bounds = [categories[0].bounds.left + categories[0].bounds.width, categories[1].bounds.left + categories[1].bounds.width];
-            for (var i = 0; i < notes.length; i++) {
-                var note = notes[i];
+            for (var i = 0; i < retroboard.notes.length; i++) {
+                var note = retroboard.notes[i];
                 content += [
                     note.location.left < bounds[0] ? categories[0].title : (note.location.left < bounds[1] ? categories[1].title : categories[2].title),
                     note.text,
                     note.votes
                 ].join(',') + "\n";
             }
-            download((boardName ? boardName : 'Retroboard') + '.csv', content);
+            download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '.csv', content);
         };
     }
 

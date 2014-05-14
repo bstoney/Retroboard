@@ -15,8 +15,16 @@
         colour: 1,
         updateFromData: function (data) {
             this.location = data.location;
-            this.votes = data.votes;
+            this.votes = data.votes || 0;
         }
+    };
+
+    FeedbackNote.createFromData = function (data) {
+        var note = new FeedbackNote(data.id, data.text);
+        note.location = data.location;
+        note.votes = data.votes || 0;
+        note.colour = data.colour;
+        return note;
     };
 
     FeedbackNote.action = {

@@ -110,6 +110,13 @@ var handleClientMessage = function (retroboard, action, data, clients) {
                 broadcastAction(FeedbackNote.action.UPDATE, retroboard.id, note, clients);
             }
             return;
+        case FeedbackNote.action.VOTE:
+            var note = retroboard.getNote(data.id);
+            if (note) {
+                note.votes++;
+                broadcastAction(FeedbackNote.action.UPDATE, retroboard.id, note, clients);
+            }
+            return;
         case ActionItem.action.ADD:
             var id = Utilities.generateUid();
             var newActionItem = ActionItem.fromData(data);

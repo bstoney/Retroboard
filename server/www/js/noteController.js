@@ -5,6 +5,10 @@ retroboardApp.controller('NoteController', ['$scope', 'Board', function ($scope,
         }
     }
 
+    $scope.$on($scope.note.id, function(){
+        onUpdateUi();
+    });
+
     $scope.style = ['feedbackNote-Colour' + $scope.note.colour];
 
     $scope.getStyle = function () {
@@ -16,17 +20,14 @@ retroboardApp.controller('NoteController', ['$scope', 'Board', function ($scope,
     };
 
     $scope.vote = function () {
-        $scope.note.votes++;
-        $scope.$emit(RetroboardController_events, $scope.note);
-        Board.updateNote($scope.note);
+        Board.voteOnNote($scope.note);
     };
     $scope.delete = function () {
         Board.deleteNote($scope.note);
     };
     $scope.setLocation = function (location) {
-        $scope.note.location = location;
+        Board.setNoteLocation($scope.note, location);
         onUpdateUi();
-        Board.updateNote($scope.note);
     };
 
     $scope.updateUi = null;
