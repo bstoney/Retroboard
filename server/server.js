@@ -96,6 +96,7 @@ var handleClientMessage = function (retroboard, action, data, clients) {
             var newNote = new FeedbackNote(Utilities.generateUid(), data.text)
             newNote.updateFromData(data);
             retroboard.addNote(newNote);
+            retroboard.bringNoteToTop(newNote);
             broadcastAction(FeedbackNote.action.ADD, retroboard.id, newNote, clients);
             return;
         case FeedbackNote.action.DELETE:
@@ -107,6 +108,7 @@ var handleClientMessage = function (retroboard, action, data, clients) {
             var note = retroboard.getNote(data.id);
             if (note) {
                 note.updateFromData(data);
+                retroboard.bringNoteToTop(note);
                 broadcastAction(FeedbackNote.action.UPDATE, retroboard.id, note, clients);
             }
             return;

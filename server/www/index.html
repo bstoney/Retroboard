@@ -32,7 +32,7 @@
 <header>
     <h1 id="title">{{boardName}}</h1>
 
-    <div class="actionItemsContainer" ng-style="{zIndex: notes.length + 2}">
+    <div class="actionItemsContainer" ng-style="{zIndex: topLevel + 2}">
         <div id="actionItems">
             <div class="actionList" ng-show="showActionItems">
                 <ul>
@@ -45,10 +45,11 @@
                     </li>
                 </ul>
                 <div class="actionListControls">
-                    <span ng-click="addActionItem()" rb-button>Add</span>
+                    <span ng-click="addActionItem()" rb-button ng-hide="true">Add</span>
                     <input type="text" placeholder="Who" ng-model="actionItemName"/>
                     <input type="text" placeholder="Action description" ng-enter="addActionItem()"
                            ng-model="actionItemText"/>
+                    <span ng-click="exportActionItems()" rb-button>Export</span>
                 </div>
             </div>
             <div id="actionShowButton" ng-click="toggleActionItems()">Action Items</div>
@@ -56,8 +57,8 @@
     </div>
 </header>
 <section id="feedbackSection">
-    <div ng-repeat="note in notes" ng-controller="NoteController" id="{{note.id}}" rb-note ng-class="getStyle()"
-         class="feedbackNote ui-state-highlight ui-corner-all">
+    <div ng-repeat="note in notes" ng-controller="NoteController" id="{{note.id}}" rb-note ng-class="getClass()"
+         class="feedbackNote ui-state-highlight ui-corner-all" ng-style="getStyle()">
         <div class="feedbackNote-Text">{{note.text}}</div>
         <div class="feedbackNote-Controls">
             <span class="feedbackNote-Delete" rb-button button-icon="ui-icon-trash" ng-click="delete()">Delete</span>
@@ -70,10 +71,10 @@
     </div>
 </section>
 <footer>
-    <span ng-click="addNote()" rb-button>Add</span>
+    <span ng-click="addNote()" rb-button ng-hide="true">Add</span>
     <input type="text" placeholder="Feedback description" ng-enter="addNote()" ng-model="noteText"/>
     <span ng-click="exportNotes()" rb-button>Export</span>
-    <div class="ui-widget-overlay ui-front" ng-show="showActionItems" ng-style="{zIndex: notes.length + 1}"></div>
+    <div class="ui-widget-overlay ui-front" ng-show="showActionItems" ng-style="{zIndex: topLevel + 1}"></div>
 </footer>
 </body>
 </html>

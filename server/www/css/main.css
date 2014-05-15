@@ -1,5 +1,6 @@
 html {
     font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
+    overflow: hidden;
 }
 
 body {
@@ -55,7 +56,7 @@ input[placeholder='Who'] {
 }
 
 input[placeholder='Action description'] {
-    width: 934px;
+    width: 919px;
 }
 
 .feedbackNote {

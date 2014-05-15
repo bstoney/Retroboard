@@ -3,31 +3,42 @@ retroboardApp.controller('NoteController', ['$scope', 'Board', function ($scope,
         if ($scope.updateUi) {
             $scope.updateUi();
         }
+        $scope.$apply();
     }
 
     $scope.$on($scope.note.id, function(){
         onUpdateUi();
     });
 
-    $scope.style = ['feedbackNote-Colour' + $scope.note.colour];
-
     $scope.getStyle = function () {
-        var style = ['feedbackNote-Colour' + $scope.note.colour];
+        return {
+            zIndex: $scope.note.order
+        };
+    };
+
+    $scope.getClass = function () {
+        var classes = ['feedbackNote-Colour' + $scope.note.colour];
         if ($scope.note.votes && $scope.note.votes >= Board.getHighVoteScore()) {
-            style.push('highVote');
+            classes.push('highVote');
         }
-        return style;
+        return classes;
     };
 
     $scope.vote = function () {
         Board.voteOnNote($scope.note);
     };
+
     $scope.delete = function () {
         Board.deleteNote($scope.note);
     };
+
     $scope.setLocation = function (location) {
         Board.setNoteLocation($scope.note, location);
-        onUpdateUi();
+    };
+
+    $scope.bringToFront = function () {
+        $scope.note.order = 10000;
+        $scope.$apply();
     };
 
     $scope.updateUi = null;

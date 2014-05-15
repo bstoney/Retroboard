@@ -1,7 +1,7 @@
 ;
 if (typeof require != 'undefined') {
     var Utilities = require('../common.js').Utilities;
-    var FeedbackNote = require('./www/js/model/feedbacknote.js').FeedbackNote;
+    var FeedbackNote = require('./feedbacknote.js').FeedbackNote;
 }
 
 (function (exports) {
@@ -19,6 +19,7 @@ if (typeof require != 'undefined') {
         boardName: '',
         notes: [],
         actionItems: [],
+        topLevel: 1,
         addNote: function (note) {
             if (typeof note != 'FeedbackNote') {
                 note = FeedbackNote.createFromData(note);
@@ -37,6 +38,10 @@ if (typeof require != 'undefined') {
             return this.notes.filter(function (a) {
                 return a.id == id;
             })[0];
+        },
+        bringNoteToTop: function (note) {
+            note.order = this.topLevel;
+            this.topLevel++;
         },
         addActionItem: function (actionItem) {
             this.actionItems.push(actionItem);
@@ -58,6 +63,7 @@ if (typeof require != 'undefined') {
             this.boardName = data.boardName || this.boardName;
             this.id = data.id;
             this.notes.length = 0;
+            this.topLevel = data.topLevel;
             data.notes.forEach(function (n) {
                 self.addNote(n);
             });

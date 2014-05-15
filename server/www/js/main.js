@@ -7,7 +7,7 @@ retroboardApp.directive('rbNote', function () {
             if (!scope.updateUi) {
                 scope.updateUi = function () {
                     element.animate(scope.note.location);
-                    updateLayers(element);
+                    //updateLayers(element);
                     //updateHighVotes();
                 }
             }
@@ -20,7 +20,7 @@ retroboardApp.directive('rbNote', function () {
 
             element.draggable({ containment: "window" })
                 .on("dragstart",function (event, ui) {
-                    updateLayers(ui.helper);
+                    scope.bringToFront();
                 }).on("dragstop", function (event, ui) {
                     scope.setLocation(ui.helper.position());
                 });
@@ -284,16 +284,9 @@ $(function () {
 //    else {
 //        $("#title").hide();
 //    }
+    $('body').disableSelection();
 });
 //
-var updateLayers = function (note) {
-    var notes = $('.feedbackNote');
-    $.each(notes, function (index) {
-        $(this).css("z-index", index);
-    });
-    $(note).css("z-index", notes.length);
-};
-
 //var updateHighVotes = function () {
 //    var notesByVote = [];
 //    $.each($('.feedbackNote'), function () {

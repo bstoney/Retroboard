@@ -2,7 +2,7 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
     var retroboard = new Retroboard(decodeURIComponent(location.search.substr(1)));
 
     function send(action, data) {
-        return Messenger.send(action, retroboard.boardId, data)
+        return Messenger.send(action, retroboard.id, data)
             .catch(function (reason) {
                 alert(reason);
                 return $q.reject(reason);
@@ -12,6 +12,7 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
     Messenger.register(MessengerServiceEvents.OPEN, function () {
         send(Retroboard.action.GET).then(function (data) {
             retroboard.fromData(data);
+            $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
         });
     });
     Messenger.register(MessengerServiceEvents.ERROR, function (error) {
@@ -19,22 +20,28 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
     });
     Messenger.register(FeedbackNote.action.ADD, function (data) {
         retroboard.addNote(FeedbackNote.createFromData(data));
+        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
     });
     Messenger.register(FeedbackNote.action.DELETE, function (id) {
         retroboard.removeNote(id);
+        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
     });
     Messenger.register(FeedbackNote.action.UPDATE, function (data) {
         var note = retroboard.getNote(data.id);
         if (note) {
             note.updateFromData(data);
+            retroboard.topLevel = note.order;
+            $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
             $rootScope.$broadcast(note.id);
         }
     });
     Messenger.register(ActionItem.action.ADD, function (actionItem) {
         retroboard.addActionItem(actionItem);
+        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
     });
     Messenger.register(ActionItem.action.DELETE, function (id) {
         retroboard.removeActionItem(id);
+        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
     });
 
     function BoardService() {
@@ -50,6 +57,10 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
             return retroboard.actionItems;
         };
 
+        this.getTopLevel = function () {
+            return retroboard.topLevel;
+        };
+
         this.createNote = function (noteText) {
             var note = new FeedbackNote("", noteText);
             note.colour = User.getFeedbackNoteColour();
@@ -62,12 +73,12 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
 
         this.voteOnNote = function (note) {
             send(FeedbackNote.action.VOTE, note);
-        }
+        };
 
         this.setNoteLocation = function (note, location) {
             note.location = location;
             send(FeedbackNote.action.UPDATE, note);
-        }
+        };
 
         this.createActionItem = function (actionItemName, actionItemText) {
             var actionItem = new ActionItem("", actionItemName, actionItemText);
@@ -85,6 +96,7 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
                 if (!notesByVote[votes]) {
                     notesByVote[votes] = [];
                 }
+
                 notesByVote[votes].push(this);
             });
 
@@ -105,7 +117,19 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
                     note.votes
                 ].join(',') + "\n";
             }
-            download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '.csv', content);
+            download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '-Notes.csv', content);
+        };
+
+        this.exportActionItems = function () {
+            var content = "Who,Description\n";
+            for (var i = 0; i < retroboard.actionItems.length; i++) {
+                var actionItem = retroboard.actionItems[i];
+                content += [
+                    actionItem.name,
+                    actionItem.text
+                ].join(',') + "\n";
+            }
+            download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '-ActionItems.csv', content);
         };
     }
 

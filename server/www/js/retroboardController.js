@@ -1,6 +1,6 @@
 var RetroboardController_events = {
-    ON_NOTE_VOTE: "note-vote",
-    ON_NOTE_UPDATE: "note-update"
+    ON_NOTE_VOTE: "retroboard-note-vote",
+    ON_NOTE_UPDATE: "retroboard-note-update"
 }
 
 retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', function ($scope, User, Board) {
@@ -11,6 +11,7 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
     $scope.actionItemText = '';
     $scope.notes = Board.getNotes();
     $scope.actionItems = Board.getActionItems();
+    $scope.topLevel = Board.getTopLevel();
     $scope.showActionItems = false;
 
     $scope.categories = [
@@ -27,6 +28,11 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
             image: 'url(\'images/confused.png\')'
         }
     ];
+
+    $scope.$on(RetroboardController_events.ON_NOTE_UPDATE, function () {
+        $scope.topLevel = Board.getTopLevel();
+        $scope.$apply();
+    });
 
     $scope.addNote = function () {
         if ($scope.noteText) {
@@ -48,6 +54,10 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
 
     $scope.exportNotes = function () {
         Board.exportNotes($scope.categories);
+    };
+
+    $scope.exportActionItems = function () {
+        Board.exportActionItems();
     };
 }])
 ;
