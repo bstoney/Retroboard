@@ -31,9 +31,13 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
         if (note) {
             note.updateFromData(data);
             retroboard.topLevel = note.order;
-            $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
-            $rootScope.$broadcast(note.id);
         }
+        else {
+            retroboard.addNote(FeedbackNote.createFromData(data));
+        }
+
+        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
+        $rootScope.$broadcast(note.id);
     });
     Messenger.register(ActionItem.action.ADD, function (actionItem) {
         retroboard.addActionItem(actionItem);
@@ -107,30 +111,31 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
         };
 
         this.exportNotes = function (categories) {
-            var content = "Category,Feedback,Votes\n";
+            var content = this.createCsvRow(['Category','Feedback','Votes']);
             var bounds = [categories[0].bounds.left + categories[0].bounds.width, categories[1].bounds.left + categories[1].bounds.width];
             for (var i = 0; i < retroboard.notes.length; i++) {
                 var note = retroboard.notes[i];
-                content += [
+                content += this.createCsvRow([
                     note.location.left < bounds[0] ? categories[0].title : (note.location.left < bounds[1] ? categories[1].title : categories[2].title),
                     note.text,
                     note.votes
-                ].join(',') + "\n";
+                ]);
             }
             download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '-Notes.csv', content);
         };
 
         this.exportActionItems = function () {
-            var content = "Who,Description\n";
+            var content = this.createCsvRow(['Who','Description']);
             for (var i = 0; i < retroboard.actionItems.length; i++) {
                 var actionItem = retroboard.actionItems[i];
-                content += [
-                    actionItem.name,
-                    actionItem.text
-                ].join(',') + "\n";
+                content += this.createCsvRow([actionItem.name, actionItem.text]);
             }
             download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '-ActionItems.csv', content);
         };
+
+        this.createCsvRow = function(items){
+            return '"' + items.join('","') + '"\n'
+        }
     }
 
     return new BoardService();

@@ -11,6 +11,12 @@ header h1 {
     text-align: center;
 }
 
+header .jiraIssuesLink
+{
+    font-weight: normal;
+    font-size: 14px;
+}
+
 #feedbackSection {
     margin: 10px auto;
     padding: 10px;

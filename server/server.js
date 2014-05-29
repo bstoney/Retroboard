@@ -79,6 +79,7 @@ var broadcastAction = function (action, boardId, data, clients) {
         board: boardId,
         data: data
     };
+
     // broadcast message to all connected clients
     var json = JSON.stringify(payload);
     console.log('Broadcast Message: ' + json);
@@ -92,12 +93,11 @@ var handleClientMessage = function (retroboard, action, data, clients) {
         case Retroboard.action.GET:
             return retroboard;
         case FeedbackNote.action.ADD:
-// TODO            boardData.feedbackNotes.set(id, { source: data.source, note: newFeedbackNote });
             var newNote = new FeedbackNote(Utilities.generateUid(), data.text)
             newNote.updateFromData(data);
             retroboard.addNote(newNote);
             retroboard.bringNoteToTop(newNote);
-            broadcastAction(FeedbackNote.action.ADD, retroboard.id, newNote, clients);
+            broadcastAction(FeedbackNote.action.ADD, retroboard.id, newNote, [this]);
             return;
         case FeedbackNote.action.DELETE:
             // TODO verify permission
@@ -163,6 +163,7 @@ var handleClientMessage = function (retroboard, action, data, clients) {
 
 wsServer.on('request', function (request) {
     if (!originIsAllowed(request.origin)) {
+
         // Make sure we only accept requests from an allowed origin
         request.reject();
         console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
@@ -192,7 +193,7 @@ wsServer.on('request', function (request) {
 
             var response = { action: payload.id };
             try {
-                response.data = handleClientMessage(retroboard, payload.action, payload.data, clients);
+                response.data = handleClientMessage.call(connection, retroboard, payload.action, payload.data, clients);
             }
             catch (e) {
                 console.log(e);
@@ -207,7 +208,8 @@ wsServer.on('request', function (request) {
     });
     connection.on('close', function (reasonCode, description) {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+
         // remove user from the list of connected clients
-//  TODO      clients.splice(index, 1);
+        clients.splice(index, 1);
     });
 });

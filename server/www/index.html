@@ -30,7 +30,9 @@
 </head>
 <body ng-controller="RetroboardController">
 <header>
-    <h1 id="title">{{boardName}}</h1>
+    <h1 id="title">
+        {{boardName}}
+    </h1>
 
     <div class="actionItemsContainer" ng-style="{zIndex: topLevel + 2}">
         <div id="actionItems">
@@ -66,7 +68,8 @@
         </div>
         <div class="feedbackNote-Votes">{{note.votes ? note.votes : ''}}</div>
     </div>
-    <div ng-repeat="category in categories" rb-group class="feedbackGrouping" ng-style="{backgroundImage: category.image}">
+    <div ng-repeat="category in categories" rb-group class="feedbackGrouping"
+         ng-style="{backgroundImage: category.image}">
         <h1>{{category.title}}</h1>
     </div>
 </section>
@@ -74,6 +77,7 @@
     <span ng-click="addNote()" rb-button ng-hide="true">Add</span>
     <input type="text" placeholder="Feedback description" ng-enter="addNote()" ng-model="noteText"/>
     <span ng-click="exportNotes()" rb-button>Export</span>
+
     <div class="ui-widget-overlay ui-front" ng-show="showActionItems" ng-style="{zIndex: topLevel + 1}"></div>
 </footer>
 </body>
