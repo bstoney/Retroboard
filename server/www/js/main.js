@@ -84,8 +84,11 @@ function makeNewPosition(newFeedbackNote) {
 }
 
 function download(filename, text) {
+    var blob = new Blob([text], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+
     var pom = document.createElement('a');
-    pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(text));
+    pom.setAttribute('href', url);
     pom.setAttribute('download', filename);
     pom.click();
 }

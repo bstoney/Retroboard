@@ -1,5 +1,6 @@
 retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', function ($rootScope, User, Messenger, $q) {
     var retroboard = new Retroboard(decodeURIComponent(location.search.substr(1)));
+    retroboard.owner = User.getUniqueUserId();
 
     function send(action, data) {
         return Messenger.send(action, retroboard.id, data)
@@ -11,16 +12,17 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
 
     Messenger.register(MessengerServiceEvents.OPEN, function () {
         send(Retroboard.action.GET).then(function (data) {
-            retroboard.fromData(data);
-            $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
+            if (data) {
+                retroboard.fromData(data);
+                $rootScope.$broadcast(RetroboardController_events.ON_RETROBOARD_UPDATE);
+            }
+            else {
+                $rootScope.$broadcast(RetroboardController_events.ON_RETROBOARD_CREATE);
+            }
         });
     });
     Messenger.register(MessengerServiceEvents.ERROR, function (error) {
         alert(error);
-    });
-    Messenger.register(FeedbackNote.action.ADD, function (data) {
-        retroboard.addNote(FeedbackNote.createFromData(data));
-        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
     });
     Messenger.register(FeedbackNote.action.DELETE, function (id) {
         retroboard.removeNote(id);
@@ -49,16 +51,16 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
     });
 
     function BoardService() {
-        this.getBoardName = function () {
-            return retroboard.boardName;
+        this.getRetroboard = function () {
+            return retroboard;
         };
 
-        this.getNotes = function () {
-            return retroboard.notes;
-        };
-
-        this.getActionItems = function () {
-            return retroboard.actionItems;
+        this.createRetroboard = function (jiraUrl) {
+            retroboard.jiraUrl = jiraUrl;
+            send(Retroboard.action.CREATE, retroboard).then(function (data) {
+                retroboard.fromData(data);
+                $rootScope.$broadcast(RetroboardController_events.ON_RETROBOARD_UPDATE);
+            });
         };
 
         this.getTopLevel = function () {
@@ -68,7 +70,11 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
         this.createNote = function (noteText) {
             var note = new FeedbackNote("", noteText);
             note.colour = User.getFeedbackNoteColour();
-            send(FeedbackNote.action.ADD, note);
+            send(FeedbackNote.action.ADD, note).then(function (data) {
+                var newNote = retroboard.addNote(data);
+                newNote.owner = User.getUniqueUserId();
+                $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
+            });
         };
 
         this.deleteNote = function (note) {
@@ -111,32 +117,36 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
         };
 
         this.exportNotes = function (categories) {
-            var content = this.createCsvRow(['Category','Feedback','Votes']);
+            var content = [];
+            content.push(this.createCsvRow(['Category', 'Feedback', 'Votes']));
             var bounds = [categories[0].bounds.left + categories[0].bounds.width, categories[1].bounds.left + categories[1].bounds.width];
             for (var i = 0; i < retroboard.notes.length; i++) {
                 var note = retroboard.notes[i];
-                content += this.createCsvRow([
+                content.push(this.createCsvRow([
                     note.location.left < bounds[0] ? categories[0].title : (note.location.left < bounds[1] ? categories[1].title : categories[2].title),
                     note.text,
                     note.votes
-                ]);
+                ]));
             }
-            download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '-Notes.csv', content);
+            download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '-Notes.csv', content.join('\n'));
         };
 
         this.exportActionItems = function () {
-            var content = this.createCsvRow(['Who','Description']);
+            var content = [];
+            content.push(this.createCsvRow(['Who', 'Description']));
             for (var i = 0; i < retroboard.actionItems.length; i++) {
                 var actionItem = retroboard.actionItems[i];
-                content += this.createCsvRow([actionItem.name, actionItem.text]);
+                content.push(this.createCsvRow([actionItem.name, actionItem.text]));
             }
-            download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '-ActionItems.csv', content);
+            download((retroboard.boardName ? retroboard.boardName : 'Retroboard') + '-ActionItems.csv', content.join('\n'));
         };
 
-        this.createCsvRow = function(items){
-            return '"' + items.join('","') + '"\n'
+        this.createCsvRow = function (items) {
+            return '"' + items.join('","') + '"'
         }
     }
 
     return new BoardService();
-}]);
+}
+])
+;

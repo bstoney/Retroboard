@@ -11,8 +11,7 @@ header h1 {
     text-align: center;
 }
 
-header .jiraIssuesLink
-{
+header .jiraIssuesLink {
     font-weight: normal;
     font-size: 14px;
 }
@@ -63,6 +62,10 @@ input[placeholder='Who'] {
 
 input[placeholder='Action description'] {
     width: 919px;
+}
+
+input[placeholder='JIRA Url'] {
+    width: 1169px;
 }
 
 .feedbackNote {
@@ -138,13 +141,13 @@ input[placeholder='Action description'] {
     background-image: url('images/ui-bg_glass_6.png');
 }
 
-.actionItemsContainer {
+.overlayPanelContainer {
     position: absolute;
     top: 0;
     width: 100%;
 }
 
-#actionItems {
+#actionItems, #retroboardOptions, #overlayPanelActions {
     width: 1220px;
     margin: 0 auto;
 }
@@ -155,21 +158,34 @@ input[placeholder='Action description'] {
     margin: 10px auto;
 }
 
-#actionItems .actionList {
+#actionItems .actionList, #retroboardOptions .retroboardOptionFields {
     border: 2px solid grey;
     border-top-style: none;
     background-color: #ffffff;
     padding: 6px;
 }
 
-#actionShowButton {
+#retroboardOptions fieldset {
+    border: 2px solid grey;
+}
+
+#retroboardOptions fieldset legend {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+#actionShowButton, #retroboardShowOptionsButton {
     float: right;
     border: 2px solid grey;
     border-top-style: none;
     background-color: #ffffff;
     padding: 3px;
-    margin-right: 10px;
+    margin: 0 10px;
     cursor: pointer;
+}
+
+#retroboardShowOptionsButton {
+    float: left;
 }
 
 .actionItem-Delete {
@@ -193,4 +209,13 @@ input[placeholder='Action description'] {
 
 .actionItem-Name:after {
     content: ' - ';
+}
+
+#retroboardOptions th {
+    text-align: left;
+    padding: 0 10px;
+}
+
+#retroboardOptions td {
+    text-align: right;
 }

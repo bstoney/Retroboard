@@ -71,7 +71,7 @@ function originIsAllowed(origin) {
 var retroBoards = new HashMap();
 var clientMap = new HashMap();
 
-var broadcastAction = function (action, boardId, data, clients) {
+function broadcastAction(action, boardId, data, clients) {
     var payload = {
         id: Utilities.generateUid(),
         action: action,
@@ -81,55 +81,63 @@ var broadcastAction = function (action, boardId, data, clients) {
     };
 
     // broadcast message to all connected clients
-    var json = JSON.stringify(payload);
+    var json = JSON.stringify(payload, this.hideOwner);
     console.log('Broadcast Message: ' + json);
     for (var i = 0; i < clients.length; i++) {
         clients[i].sendUTF(json);
     }
-};
+}
 
-var handleClientMessage = function (retroboard, action, data, clients) {
+function handleClientMessage(action, data) {
+    var retroboard = retroBoards.has(this.board) ? retroBoards.get(this.board) : null;
     switch (action) {
         case Retroboard.action.GET:
             return retroboard;
+        case Retroboard.action.CREATE:
+            if (!retroBoards.has(data.id)) {
+                // TODO better!
+                retroboard = new Retroboard(data.id);
+                retroboard.fromData(data);
+                retroBoards.set(data.id, retroboard);
+            }
+            return retroboard;
         case FeedbackNote.action.ADD:
-            var newNote = new FeedbackNote(Utilities.generateUid(), data.text)
+            var newNote = retroboard.addNote(new FeedbackNote(Utilities.generateUid(), data.text));
             newNote.updateFromData(data);
-            retroboard.addNote(newNote);
+            newNote.owner = this.user;
             retroboard.bringNoteToTop(newNote);
-            broadcastAction(FeedbackNote.action.ADD, retroboard.id, newNote, [this]);
-            return;
+            return newNote;
         case FeedbackNote.action.DELETE:
             // TODO verify permission
             retroboard.removeNote(data.id);
-            broadcastAction(FeedbackNote.action.DELETE, retroboard.id, data.id, clients);
-            return;
+            broadcastAction.call(this, FeedbackNote.action.DELETE, retroboard.id, data.id, this.allClients);
+            return null;
         case FeedbackNote.action.UPDATE:
             var note = retroboard.getNote(data.id);
             if (note) {
                 note.updateFromData(data);
                 retroboard.bringNoteToTop(note);
-                broadcastAction(FeedbackNote.action.UPDATE, retroboard.id, note, clients);
+                broadcastAction.call(this, FeedbackNote.action.UPDATE, retroboard.id, note, this.allClients);
             }
-            return;
+            return null;
         case FeedbackNote.action.VOTE:
             var note = retroboard.getNote(data.id);
             if (note) {
                 note.votes++;
-                broadcastAction(FeedbackNote.action.UPDATE, retroboard.id, note, clients);
+                broadcastAction.call(this, FeedbackNote.action.UPDATE, retroboard.id, note, this.allClients);
             }
-            return;
+            return null;
         case ActionItem.action.ADD:
-            var id = Utilities.generateUid();
             var newActionItem = ActionItem.fromData(data);
-            newActionItem.id = id;
+            newActionItem.id = Utilities.generateUid();
+            newActionItem.owner = this.user;
             retroboard.addActionItem(newActionItem);
-            broadcastAction(ActionItem.action.ADD, retroboard.id, newActionItem, clients);
-            return;
+            broadcastAction.call(this, ActionItem.action.ADD, retroboard.id, newActionItem, this.allClients);
+            return null;
         case ActionItem.action.DELETE:
             retroboard.removeActionItem(data.id);
-            broadcastAction(ActionItem.action.DELETE, retroboard.id, data.id, clients);
-            return;
+            broadcastAction.call(this, ActionItem.action.DELETE, retroboard.id, data.id, this.allClients);
+            return null;
         default:
 //            if (boardData.feedbackNotes.has(data.note.id)) {
 //                var item = boardData.feedbackNotes.get(data.note.id)
@@ -141,17 +149,17 @@ var handleClientMessage = function (retroboard, action, data, clients) {
 //                        if (isRequestFromSource) {
 //                            feedbackNote.colour = data.note.colour;
 //                        }
-//                        broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, null, clients);
+//                        broadcastAction.call(this, FeedbackNote.action.UPDATE, feedbackNote, null, this.allClients);
 //                        break;
 //                    case FeedbackNote.action.DELETE:
 //                        if (isRequestFromSource) {
 //                            boardData.feedbackNotes.remove(feedbackNote.id);
-//                            broadcastAction(FeedbackNote.action.DELETE, feedbackNote, null, clients);
+//                            broadcastAction.call(this, FeedbackNote.action.DELETE, feedbackNote, null, this.allClients);
 //                        }
 //                        break;
 //                    case FeedbackNote.action.VOTE:
 //                        feedbackNote.votes++;
-//                        broadcastAction(FeedbackNote.action.UPDATE, feedbackNote, null, clients);
+//                        broadcastAction.call(this, FeedbackNote.action.UPDATE, feedbackNote, null, this.allClients);
 //                        break;
 //                }
 //            }
@@ -159,7 +167,7 @@ var handleClientMessage = function (retroboard, action, data, clients) {
     }
 
     throw "Not implemented";
-};
+}
 
 wsServer.on('request', function (request) {
     if (!originIsAllowed(request.origin)) {
@@ -185,22 +193,29 @@ wsServer.on('request', function (request) {
                 clients = clientMap.get(payload.board);
                 index = clients.push(connection) - 1;
             }
-            if (!retroBoards.has(payload.board)) {
-                retroBoards.set(payload.board, new Retroboard(payload.board));
-            }
 
-            var retroboard = retroBoards.get(payload.board);
+            var connectionDetails = {
+                client: connection,
+                allClients: clients,
+                board: payload.board,
+                user: payload.user,
+                hideOwner: function (key, value) {
+                    return key == "owner" && value != payload.user ? undefined : value;
+                }
+            };
 
             var response = { action: payload.id };
             try {
-                response.data = handleClientMessage.call(connection, retroboard, payload.action, payload.data, clients);
+                response.data = handleClientMessage.call(connectionDetails, payload.action, payload.data);
             }
             catch (e) {
                 console.log(e);
                 response.error = e.toString();
             }
 
-            connection.send(JSON.stringify(response));
+            var json = JSON.stringify(response, connectionDetails.hideOwner);
+            console.log('Response Message: ' + json);
+            connection.send(json);
         }
         else {
             console.log('Received unexpected data type ' + message.type);
