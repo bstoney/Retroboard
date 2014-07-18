@@ -1,0 +1,15 @@
+#actionItems
+    script(type="text/javascript", src="modules/actionItems/actionItemController.js")
+    .actionList(ng-show="showActionItems")
+        ul: li.actionItem(ng-repeat="actionItem in actionItems", ng-controller="ActionItemController", id="{{actionItem.id}}")
+            span.actionItem-Name {{actionItem.name}}
+            span.actionItem-Text {{actionItem.text}}
+            span.actionItem-Delete(rb-button, button-icon="ui-icon-trash", ng-click="delete()") Delete
+        .actionListControls
+            span(ng-click="addActionItem()", rb-button, ng-hide="true").
+                Add
+
+            input(type="text", placeholder="Who", ng-model="actionItemName")
+            input(type="text", placeholder="Action description", ng-enter="addActionItem()", ng-model="actionItemText")
+
+            span(ng-click="exportActionItems()", rb-button) Export

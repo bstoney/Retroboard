@@ -52,6 +52,10 @@ footer {
     font-size: 12px;
 }
 
+input {
+    margin-right: 3px;
+}
+
 footer input[type=text] {
     width: 1674px;
 }

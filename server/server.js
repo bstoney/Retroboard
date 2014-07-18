@@ -4,6 +4,7 @@ var path = require("path");
 var url = require("url");
 var ws = require('websocket').server;
 var HashMap = require('hashmap').HashMap;
+var jade = require('jade');
 var Utilities = require('./www/js/common.js').Utilities;
 var Retroboard = require('./www/js/model/retroboard.js').Retroboard;
 var FeedbackNote = require('./www/js/model/feedbacknote.js').FeedbackNote;
@@ -11,6 +12,7 @@ var ActionItem = require('./www/js/model/actionitem.js').ActionItem;
 
 var mimeTypes = {
     "html": "text/html",
+    "jade": "text/html",
     "jpeg": "image/jpeg",
     "jpg": "image/jpeg",
     "png": "image/png",
@@ -21,40 +23,65 @@ var mimeTypes = {
 var SERVER_PORT = 8080;
 
 var server = http.createServer(function (request, response) {
-
     var uri = url.parse(request.url).pathname;
-
-    uri = "www/" + uri;
-
-    if (uri.charAt(uri.length - 1) == "/") {
-        uri += "index.html";
-    }
 
     if (uri.indexOf("..") != -1) {
         response.writeHead(403);
         response.end();
     }
 
-    var filename = path.join(process.cwd(), uri);
+    uri = "www/" + uri;
+    if (uri.charAt(uri.length - 1) == "/") {
+        uri += "index";
+    }
 
+    var filename = path.join(process.cwd(), uri);
     console.log("\tAttempting to serve: " + filename);
 
-    path.exists(filename, function (exists) {
+    var files = [];
+    if (!path.extname(filename).split(".")[1]) {
+        files.push(filename + '.html', filename + '.jade');
+    }
+    else {
+        files.push(filename);
+    }
 
-        if (!exists) {
-            console.log("File not found: " + filename);
-            response.writeHead(404);
-            response.end("Sorry, the file you requested was not found. Don't let it ruin your day! :)");
-            return;
-        }
+    function processRequest() {
+        var filename = files.pop();
+        fs.exists(filename, function (exists) {
+            if (exists) {
+                var extension = path.extname(filename).split(".")[1];
+                var mimeType = mimeTypes[extension];
 
-        var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
-        response.writeHead(200, {'Content-Type': mimeType});
+                if (extension == 'jade') {
+                    try {
+                        var html = jade.renderFile(filename);
+                        response.writeHead(200, {'Content-Type': mimeType});
+                        response.end(html);
+                    } catch (e) {
+                        console.error(e);
+                        response.writeHead(500);
+                        response.end();
+                    }
+                }
+                else {
+                    response.writeHead(200, {'Content-Type': mimeType});
+                    var fileStream = fs.createReadStream(filename);
+                    fileStream.pipe(response);
+                }
+            } else if (files.length == 0) {
+                console.log("File not found: " + filename);
+                response.writeHead(404);
+                response.end("Sorry, the file you requested was not found. Don't let it ruin your day! :)");
+                return;
+            }
+            else {
+                processRequest();
+            }
+        });
+    }
 
-        var fileStream = fs.createReadStream(filename);
-        fileStream.pipe(response);
-    });
-
+    processRequest();
 
 }).listen(SERVER_PORT);
 
@@ -228,3 +255,5 @@ wsServer.on('request', function (request) {
         clients.splice(index, 1);
     });
 });
+
+console.log("Retroboard listening on port " + SERVER_PORT);
