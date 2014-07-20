@@ -166,30 +166,6 @@ function handleClientMessage(action, data) {
             broadcastAction.call(this, ActionItem.action.DELETE, retroboard.id, data.id, this.allClients);
             return null;
         default:
-//            if (boardData.feedbackNotes.has(data.note.id)) {
-//                var item = boardData.feedbackNotes.get(data.note.id)
-//                var isRequestFromSource = item.source == data.source;
-//                var feedbackNote = item.note;
-//                switch (data.action) {
-//                    case FeedbackNote.action.UPDATE:
-//                        feedbackNote.location = data.note.location;
-//                        if (isRequestFromSource) {
-//                            feedbackNote.colour = data.note.colour;
-//                        }
-//                        broadcastAction.call(this, FeedbackNote.action.UPDATE, feedbackNote, null, this.allClients);
-//                        break;
-//                    case FeedbackNote.action.DELETE:
-//                        if (isRequestFromSource) {
-//                            boardData.feedbackNotes.remove(feedbackNote.id);
-//                            broadcastAction.call(this, FeedbackNote.action.DELETE, feedbackNote, null, this.allClients);
-//                        }
-//                        break;
-//                    case FeedbackNote.action.VOTE:
-//                        feedbackNote.votes++;
-//                        broadcastAction.call(this, FeedbackNote.action.UPDATE, feedbackNote, null, this.allClients);
-//                        break;
-//                }
-//            }
             break;
     }
 

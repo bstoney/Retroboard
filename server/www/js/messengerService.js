@@ -42,39 +42,6 @@ retroboardApp.factory('Messenger', ['User', '$rootScope', '$q', function (User, 
             console.log('Received Message: ' + event.data);
             var payload = JSON.parse(event.data);
             callbackHandlers.trigger(payload.action, payload.data, payload.error);
-
-//        var note = FeedbackNote.fromData(data.note);
-//        switch (data.action) {
-//            case FeedbackNote.action.ADD:
-//                var newFeedbackNote = $('<div id="' + note.id + '"></div>');
-//                $("#feedbackSection").prepend(newFeedbackNote);
-//                newFeedbackNote.feedbackNote();
-//                if (!note.location) {
-//                    var newLocation = makeNewPosition(newFeedbackNote);
-//                    note.location = newLocation;
-//                    note.colour = feedbackNoteColour;
-//                    note.send(connection, FeedbackNote.action.UPDATE, sourceId, boardId);
-//                }
-//                if(data.source == sourceId)
-//                {
-//                    newFeedbackNote.feedbackNote("enableDelete");
-//                }
-//                newFeedbackNote.feedbackNote("update", note);
-//                break;
-//            case FeedbackNote.action.UPDATE:
-//                var feedbackNote = $("#" + note.id);
-//                if (!feedbackNote.length) {
-//                    feedbackNote = $('<div id="' + note.id + '"></div>');
-//                    $("#feedbackSection").prepend(feedbackNote);
-//                    feedbackNote.feedbackNote();
-//                }
-//                feedbackNote.feedbackNote("update", note);
-//
-//                break;
-//            case FeedbackNote.action.DELETE:
-//                $("#" + note.id).feedbackNote("remove");
-//                break;
-//        }
         };
         connection.onerror = function (event) {
             var errorMessage = "An unexpected connection error has occurred.";
