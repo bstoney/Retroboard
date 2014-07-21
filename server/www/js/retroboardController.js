@@ -1,8 +1,10 @@
 var RetroboardController_events = {
     ON_NOTE_VOTE: "retroboard-note-vote",
     ON_NOTE_UPDATE: "retroboard-note-update",
+    ON_ACTION_ITEM_UPDATE: "retroboard-action-update",
     ON_RETROBOARD_CREATE: "retroboard-create",
-    ON_RETROBOARD_UPDATE: "retroboard-update"
+    ON_RETROBOARD_UPDATE: "retroboard-update",
+    ON_TOGGLE_OVERLAY: "retroboard-show-overlay"
 };
 
 retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', function ($scope, User, Board) {
@@ -25,9 +27,7 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
     $scope.totalVotes = retroboard.getTotalVotes();
 
     $scope.$on(RetroboardController_events.ON_NOTE_UPDATE, function () {
-        $scope.topLevel = Board.getTopLevel();
         $scope.totalVotes = retroboard.getTotalVotes();
-        $scope.$apply();
     });
 
     $scope.$on(RetroboardController_events.ON_RETROBOARD_CREATE, function () {
@@ -35,10 +35,13 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
     });
 
     $scope.$on(RetroboardController_events.ON_RETROBOARD_UPDATE, function () {
-        $scope.topLevel = Board.getTopLevel();
         $scope.owner = retroboard.owner;
         $scope.jiraUrl = retroboard.jiraUrl;
         $scope.totalVotes = retroboard.getTotalVotes();
+    });
+
+    $scope.$on(RetroboardController_events.ON_TOGGLE_OVERLAY, function () {
+        $scope.showOverlay = !$scope.showOverlay;
     });
 
     $scope.addNote = function () {
@@ -56,7 +59,6 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
     };
 
     $scope.toggleActionItems = function () {
-        $scope.topLevel = Board.getTopLevel();
         $scope.showOverlay = $scope.showActionItems = !$scope.showActionItems;
     };
 
@@ -66,7 +68,6 @@ retroboardApp.controller('RetroboardController', ['$scope', 'User', 'Board', fun
     };
 
     $scope.toggleRetroboardOptions = function () {
-        $scope.topLevel = Board.getTopLevel();
         $scope.showOverlay = $scope.showRetroboardOptions = !$scope.showRetroboardOptions;
     };
 

@@ -3,18 +3,17 @@ retroboardApp.controller('NoteController', ['$scope', 'Board', function ($scope,
         if ($scope.updateUi) {
             $scope.updateUi();
         }
+        $scope.style.zIndex = $scope.note.order;
         $scope.$apply();
     }
 
-    $scope.$on($scope.note.id, function(){
+    $scope.style = {
+        zIndex: $scope.note.order
+    };
+
+    $scope.$on($scope.note.id, function () {
         onUpdateUi();
     });
-
-    $scope.getStyle = function () {
-        return {
-            zIndex: $scope.note.order
-        };
-    };
 
     $scope.getClass = function () {
         var classes = ['feedbackNote-Colour' + $scope.note.colour];
@@ -37,7 +36,7 @@ retroboardApp.controller('NoteController', ['$scope', 'Board', function ($scope,
     };
 
     $scope.bringToFront = function () {
-        $scope.note.order = 10000;
+        $scope.style.zIndex = Board.getTopLevel();
         $scope.$apply();
     };
 

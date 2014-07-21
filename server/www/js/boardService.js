@@ -38,16 +38,16 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
             retroboard.addNote(FeedbackNote.createFromData(data));
         }
 
-        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
+        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE, note);
         $rootScope.$broadcast(note.id);
     });
     Messenger.register(ActionItem.action.ADD, function (actionItem) {
         retroboard.addActionItem(actionItem);
-        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
+        $rootScope.$broadcast(RetroboardController_events.ON_ACTION_ITEM_UPDATE);
     });
     Messenger.register(ActionItem.action.DELETE, function (id) {
         retroboard.removeActionItem(id);
-        $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
+        $rootScope.$broadcast(RetroboardController_events.ON_ACTION_ITEM_UPDATE);
     });
 
     function BoardService() {
@@ -64,7 +64,7 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
         };
 
         this.getTopLevel = function () {
-            return retroboard.topLevel;
+            return 86401;
         };
 
         this.createNote = function (noteText) {
@@ -73,7 +73,7 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
             send(FeedbackNote.action.ADD, note).then(function (data) {
                 var newNote = retroboard.addNote(data);
                 newNote.owner = User.getUniqueUserId();
-                $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE);
+                $rootScope.$broadcast(RetroboardController_events.ON_NOTE_UPDATE, newNote);
             });
         };
 
@@ -86,7 +86,7 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
         };
 
         this.setNoteLocation = function (note, location) {
-            note.location = location;
+            note.setLocation(location);
             send(FeedbackNote.action.UPDATE, note);
         };
 
@@ -147,6 +147,4 @@ retroboardApp.factory('Board', ['$rootScope', 'User', 'Messenger', '$q', functio
     }
 
     return new BoardService();
-}
-])
-;
+}]);
