@@ -5,6 +5,7 @@
     "author": "Brad Stoney",
     "dependencies": {
         "hashmap": "1.x.x",
+        "jade": "^1.11.0",
         "websocket": "1.x.x"
     },
     "repository": {

@@ -1,7 +1,7 @@
-var http = require("http");
-var fs = require("fs");
-var path = require("path");
-var url = require("url");
+var http = require('http');
+var fs = require('fs');
+var path = require('path');
+var url = require('url');
 var ws = require('websocket').server;
 var HashMap = require('hashmap').HashMap;
 var jade = require('jade');
@@ -11,35 +11,36 @@ var FeedbackNote = require('./www/js/model/feedbacknote.js').FeedbackNote;
 var ActionItem = require('./www/js/model/actionitem.js').ActionItem;
 
 var mimeTypes = {
-    "html": "text/html",
-    "jade": "text/html",
-    "jpeg": "image/jpeg",
-    "jpg": "image/jpeg",
-    "png": "image/png",
-    "js": "text/javascript",
-    "css": "text/css"
+    'html': 'text/html',
+    'jade': 'text/html',
+    'jpeg': 'image/jpeg',
+    'jpg': 'image/jpeg',
+    'png': 'image/png',
+    'js': 'text/javascript',
+    'css': 'text/css'
 };
+var DEFAULT_MIME_TYPE = 'text/plain';
 
 var SERVER_PORT = 8080;
 
 var server = http.createServer(function (request, response) {
     var uri = url.parse(request.url).pathname;
 
-    if (uri.indexOf("..") != -1) {
+    if (uri.indexOf('..') != -1) {
         response.writeHead(403);
         response.end();
     }
 
-    uri = "www/" + uri;
-    if (uri.charAt(uri.length - 1) == "/") {
-        uri += "index";
+    uri = 'www/' + uri;
+    if (uri.charAt(uri.length - 1) == '/') {
+        uri += 'index';
     }
 
     var filename = path.join(process.cwd(), uri);
-    console.log("\tAttempting to serve: " + filename);
+    console.log('\tAttempting to serve: ' + filename);
 
     var files = [];
-    if (!path.extname(filename).split(".")[1]) {
+    if (!path.extname(filename).split('.')[1]) {
         files.push(filename + '.html', filename + '.jade');
     }
     else {
@@ -50,8 +51,8 @@ var server = http.createServer(function (request, response) {
         var filename = files.pop();
         fs.exists(filename, function (exists) {
             if (exists) {
-                var extension = path.extname(filename).split(".")[1];
-                var mimeType = mimeTypes[extension];
+                var extension = path.extname(filename).split('.')[1];
+                var mimeType = mimeTypes[extension] || DEFAULT_MIME_TYPE;
 
                 if (extension == 'jade') {
                     try {
@@ -70,9 +71,9 @@ var server = http.createServer(function (request, response) {
                     fileStream.pipe(response);
                 }
             } else if (files.length == 0) {
-                console.log("File not found: " + filename);
+                console.log('File not found: ' + filename);
                 response.writeHead(404);
-                response.end("Sorry, the file you requested was not found. Don't let it ruin your day! :)");
+                response.end('Sorry, the file you requested was not found. Don\'t let it ruin your day! :)');
                 return;
             }
             else {
@@ -128,6 +129,15 @@ function handleClientMessage(action, data) {
                 retroBoards.set(data.id, retroboard);
             }
             return retroboard;
+        default:
+            break;
+	}
+
+	if(!retroboard) {
+		throw new Error('No retroboard created');
+	}
+
+	switch (action) {
         case FeedbackNote.action.ADD:
             var newNote = retroboard.addNote(new FeedbackNote(Utilities.generateUid(), data.text));
             newNote.updateFromData(data);
@@ -169,7 +179,7 @@ function handleClientMessage(action, data) {
             break;
     }
 
-    throw "Not implemented";
+    throw new Error('Not implemented');
 }
 
 wsServer.on('request', function (request) {
@@ -203,7 +213,7 @@ wsServer.on('request', function (request) {
                 board: payload.board,
                 user: payload.user,
                 hideOwner: function (key, value) {
-                    return key == "owner" && value != payload.user ? undefined : value;
+                    return key == 'owner' && value != payload.user ? undefined : value;
                 }
             };
 
@@ -232,4 +242,4 @@ wsServer.on('request', function (request) {
     });
 });
 
-console.log("Retroboard listening on port " + SERVER_PORT);
+console.log('Retroboard listening on port ' + SERVER_PORT);

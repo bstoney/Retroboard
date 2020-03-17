@@ -29,7 +29,7 @@ html(ng-app="retroboardApp")
     body(ng-controller="RetroboardController")
         header
             h1#title
-                {{boardName}}
+                 {{boardName}}
                 a.jiraIssuesLink(ng-show="jiraUrl" ng-href="{{jiraUrl}}", target="_blank") JIRA issues
 
             .overlayPanelContainer(ng-style="{zIndex: topLevel + 2}")
